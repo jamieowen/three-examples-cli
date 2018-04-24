@@ -1,0 +1,8 @@
+{
+  "name": "three-examples-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:jamieowen/three-examples-cli.git",
+  "author": "jamieowen <hello@jamieowen.com>",
+  "license": "MIT"
+}
