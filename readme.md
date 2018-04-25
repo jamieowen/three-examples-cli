@@ -2,7 +2,7 @@
 # three-examples-cli
 
 ## Description
-
+Examples transform using babel traverse for ast manipulation underneath.
 
 ## Install
 
@@ -21,6 +21,8 @@ import {
     OBJLoader
 } from 'three/ex';
 ```
+
+### JSON Configuration
 
 ## Caveats
 This modifies the node_modules three folder directly, which obviously has its draw backs.
