@@ -15,7 +15,7 @@ module.exports = ( threePath, examples )=>{
     const manager = new ExamplesManager( three );
 
     const stats = {};      
-    // const spinner = ora('Parsing Examples\nHello').start();
+    const spinner = ora('Parsing Examples\nHello').start();
     const updateStats = ( path, stats )=>{
 
         let text = 'Parsing Examples';
@@ -29,7 +29,7 @@ module.exports = ( threePath, examples )=>{
         //     text += `\n${e.key}:${e.value}`;
         // });
 
-        // spinner.text = text;
+        spinner.text = text;
 
     }
 
@@ -57,7 +57,7 @@ module.exports = ( threePath, examples )=>{
 
                         manager.updateIndexes( info );
                         resolve( result );
-                        
+
                     }                        
         
                 } )
@@ -71,6 +71,7 @@ module.exports = ( threePath, examples )=>{
     return queue.then( ( result )=>{
         
         manager.updateCircularRefs();
+        spinner.stopAndPersist();
         return manager;
 
     })

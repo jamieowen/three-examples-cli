@@ -55,5 +55,5 @@ Promise.resolve()
     .catch( (err)=>{
 
         console.log( 'Err ', err );
-        
+
     })

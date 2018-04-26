@@ -31,11 +31,20 @@ module.exports = function globAndGroup( threePath ){
                 reject( err );
             }else{
 
-                examples = examples.map( ( example,i )=>{
+                examples = examples.map( ( ex,i )=>{
+
+                    const folders = ex.split( path.sep );
+                    let group = 'none';
+                    // examples/js/group/
+                    if( folders.length > 2 ){
+                        group = folders[ 2 ];                        
+                    }
+
+                    console.log( group, ': ', ex );
 
                     return {
-                        path: example,
-                        group: 'none'
+                        path: ex,
+                        group: group
                     };
             
                 })
