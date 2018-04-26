@@ -1,74 +1,21 @@
+
 const path = require( 'path' );
 const babel = require( '@babel/core' );
 const ora = require( 'ora' );
 
 const transformPlugin = require( './transformPlugin' );
 
-class ExampleInfo{
-
-    constructor( path, isGlobal ){
-
-        this.path = path;
-        this.isGlobal = isGlobal;
-
-        this.imports = [];
-        this.exports = [];
-        this.globals = [];
-
-        this.exportDefault = null;
-
-    }
-
-    addImport( memberName ){
-        
-        if( this.isGlobal( memberName ) ){
-            if( this.globals.indexOf( memberName ) === -1 ){
-                this.globals.push( memberName );
-            }
-        }else
-        if( this.imports.indexOf( memberName ) === -1 ){
-            this.imports.push( memberName );
-        }
-
-    }
-
-    addExport( memberName ){
-
-        if( this.exportDefault === null && this.path.indexOf( memberName ) > -1 ){
-            this.exportDefault = memberName;
-        }
-
-        this.exports.push( memberName );
-
-    }
-
-}
+const ExampleInfo = require( './ExampleInfo' );
+const ExamplesManager = require( './ExamplesManager' );
 
 
 module.exports = ( threePath, examples )=>{
-
+    
     const three = require( threePath );
-    const info = {
-
-        globals: Object.keys( ( key )=>{
-
-        }),
-        examples: {
-            byPath: {},
-            byGroup: {},
-            byClass: {}
-        }
-
-    };
-
-    const isGlobal = ( memberName )=>{
-
-        return three[ memberName ] !== undefined;
-
-    }
+    const manager = new ExamplesManager( three );
 
     const stats = {};      
-    const spinner = ora('Parsing Examples\nHello').start();
+    // const spinner = ora('Parsing Examples\nHello').start();
     const updateStats = ( path, stats )=>{
 
         let text = 'Parsing Examples';
@@ -82,7 +29,7 @@ module.exports = ( threePath, examples )=>{
         //     text += `\n${e.key}:${e.value}`;
         // });
 
-        spinner.text = text;
+        // spinner.text = text;
 
     }
 
@@ -90,8 +37,7 @@ module.exports = ( threePath, examples )=>{
 
     examples.forEach( ( example )=>{
 
-        const exampleInfo = new ExampleInfo( example.path, isGlobal );
-        info.examples.byPath[ example.path ] = exampleInfo;
+        const info = new ExampleInfo( example.path,example.group,manager );
 
         queue = queue.then( ()=>{
 
@@ -101,7 +47,7 @@ module.exports = ( threePath, examples )=>{
 
                 babel.transformFile( path.join( threePath, example.path ), {
                     plugins: [ 
-                        transformPlugin( 'gather', exampleInfo, stats )
+                        transformPlugin( 'gather', info, stats )
                     ]
                 }, ( err, result )=>{
         
@@ -109,7 +55,9 @@ module.exports = ( threePath, examples )=>{
                         reject(err);
                     }else{
 
+                        manager.updateIndexes( info );
                         resolve( result );
+                        
                     }                        
         
                 } )
@@ -122,14 +70,8 @@ module.exports = ( threePath, examples )=>{
 
     return queue.then( ( result )=>{
         
-        /**
-         * Search for circular dependencies as these files 
-         * need splitting in two when transformed.
-         */
-        spinner.stopAndPersist();
-        console.log( Object.keys( info ) );
-
-        return info;
+        manager.updateCircularRefs();
+        return manager;
 
     })
     

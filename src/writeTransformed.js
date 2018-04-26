@@ -1,6 +1,6 @@
-module.exports = ()=>{
+module.exports = ( info )=>{
 
-    console.log( 'Export transformed' );
+    console.log( 'Export Transformed' );
     let queue = Promise.resolve();
     return queue;
 

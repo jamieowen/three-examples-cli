@@ -3,6 +3,7 @@ const fs = require( 'fs-extra' );
 
 const globAndGroup = require( './globAndGroup' );
 const gatherExampleInfo = require( './gatherExampleInfo' );
+const filterInfo = require( './filterInfo' );
 const writeTransformed = require( './writeTransformed' );
 
 // var argv = require('yargs')
@@ -13,7 +14,6 @@ const writeTransformed = require( './writeTransformed' );
 //   })
 //   .help()
 //   .argv
-
 
 
 /**
@@ -42,10 +42,18 @@ if( !threePath ){
 Promise.resolve()
     .then( ()=>globAndGroup( threePath ) )
     .then( (examples)=>gatherExampleInfo( threePath,examples ) )
+    .then( (info)=>filterInfo( info ) )
+    .then( (info)=>writeTransformed( info ) )
     .then( (info)=>{
 
+        console.log( 'Done..' );
         // console.log( 'MAP' , info );
 
         return 
 
+    })
+    .catch( (err)=>{
+
+        console.log( 'Err ', err );
+        
     })

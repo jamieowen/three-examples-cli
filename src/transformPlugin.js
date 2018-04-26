@@ -42,11 +42,25 @@ module.exports = function( runMode, info, stats ){
                     },
                     exit: ( path, state )=>{
 
-                        // Insert exports/imports.
 
-                        // Validate imports. There are cases where we will not be able to 
-                        // determine if a usage is definitely an import.
-                        // e.g. When we declare a class/constant within a file and use it within the same file.
+
+                        if( RUN_MODE.INFO ){
+
+                            /**
+                             * Validate/Filter imports. There are cases where we will not be able to 
+                             * determine if a usage is definitely an import.
+                             * e.g. When we declare a class/constant within a file and use it within the same file.
+                             */
+
+                            const before = info.imports;
+                            info.imports = info.imports.filter( (imp)=>{
+                                return info.exports.indexOf( imp ) === -1 && info.exportDefault !== imp;
+                            })
+
+                        }else
+                        if( RUN_MODE.TRANSFORM ){
+
+                        }
 
                     }
 
