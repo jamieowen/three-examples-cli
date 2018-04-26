@@ -40,7 +40,7 @@ if( !threePath ){
 gatherExampleInfo( threePath, {} )
     .then( ( info )=>{
 
-        console.log( 'MAP' , info );
+        // console.log( 'MAP' , info );
 
         return 
 
