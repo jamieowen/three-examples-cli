@@ -1,8 +1,8 @@
 const path = require( 'path' );
-const glob = require( 'glob' );
 const babel = require( '@babel/core' );
-const transformPlugin = require( './transformPlugin' );
+const ora = require( 'ora' );
 
+const transformPlugin = require( './transformPlugin' );
 
 class ExampleInfo{
 
@@ -45,7 +45,7 @@ class ExampleInfo{
 }
 
 
-module.exports = ( threePath, opts )=>{
+module.exports = ( threePath, examples )=>{
 
     const three = require( threePath );
     const info = {
@@ -55,37 +55,11 @@ module.exports = ( threePath, opts )=>{
         }),
         examples: {
             byPath: {},
-            byFolder: {},
+            byGroup: {},
             byClass: {}
         }
 
     };
-
-    let examples = glob.sync( 'examples/js/**/*.js', {
-        cwd: threePath,
-        ignore: [
-
-            'examples/js/*.*',
-
-            'examples/js/libs/**/*.*',
-            'examples/js/crossfade/**/*.*',
-            'examples/js/workers/**/*.*',
-
-            'examples/js/loaders/sea3d/**/*.*',
-            'examples/js/loaders/ctm/**/*.*',
-
-            'examples/js/loaders/NodeMaterialLoader.js',
-            'examples/js/loaders/PRWMLoader.js',
-            'examples/js/loaders/XLoader.js',
-            'examples/js/Octree.js',
-            'examples/js/Volume.js'
-
-        ]
-    } );
-
-    // examples = examples.filter( (path)=>{
-    //     return path.indexOf( 'postprocessing' ) > -1 || path.indexOf( 'shaders' ) > -1;
-    // });
 
     const isGlobal = ( memberName )=>{
 
@@ -93,21 +67,39 @@ module.exports = ( threePath, opts )=>{
 
     }
 
-    let stats = {};
-    let queue = Promise.resolve();
+    const stats = {};      
+    const spinner = ora('Parsing Examples\nHello').start();
+    const updateStats = ( path, stats )=>{
 
-    examples.forEach( ( examplePath )=>{
+        let text = 'Parsing Examples';
+        text += `\n:${path}`;
 
-        const exampleInfo = new ExampleInfo( examplePath, isGlobal );
-        info.examples.byPath[ examplePath ] = exampleInfo;
+        // let sorted = Object.keys( stats ).map( (k,i)=>{
+        //     return { value: stats[k], key: k }
+        // } ).sort((a,b)=>b.value-a.value);
+
+        // sorted.forEach( (e)=>{
+        //     text += `\n${e.key}:${e.value}`;
+        // });
+
+        spinner.text = text;
+
+    }
+
+    let queue = Promise.resolve();  
+
+    examples.forEach( ( example )=>{
+
+        const exampleInfo = new ExampleInfo( example.path, isGlobal );
+        info.examples.byPath[ example.path ] = exampleInfo;
 
         queue = queue.then( ()=>{
 
             return new Promise( (resolve,reject )=>{
 
-                // console.log( 'path', examplePath );
-                
-                babel.transformFile( path.join( threePath, examplePath ), {
+                updateStats( example.path, stats );
+
+                babel.transformFile( path.join( threePath, example.path ), {
                     plugins: [ 
                         transformPlugin( 'gather', exampleInfo, stats )
                     ]
@@ -116,17 +108,6 @@ module.exports = ( threePath, opts )=>{
                     if( err ){
                         reject(err);
                     }else{
-
-                        if( exampleInfo.exports.length ){
-
-                            // console.log( '' );
-                            // console.log( '/', exampleInfo.path );
-                            // console.log( 'globals:', exampleInfo.globals );
-                            // console.log( 'imports:', exampleInfo.imports );
-                            // console.log( 'exports:', exampleInfo.exports );
-                            // console.log( 'default:', exampleInfo.exportDefault );
-
-                        }
 
                         resolve( result );
                     }                        
@@ -139,9 +120,15 @@ module.exports = ( threePath, opts )=>{
 
     });
 
-    return queue.then( ()=>{
+    return queue.then( ( result )=>{
+        
+        /**
+         * Search for circular dependencies as these files 
+         * need splitting in two when transformed.
+         */
+        spinner.stopAndPersist();
+        console.log( Object.keys( info ) );
 
-        console.log( stats );
         return info;
 
     })

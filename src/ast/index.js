@@ -36,7 +36,7 @@ module.exports = ( t )=>{
             }
 
             if( !result ){
-                throw new Error( `Couldn't result resolve MemberExpression head. Increase maxDepth.` );
+                throw new Error( `Couldn't resolve MemberExpression head. Increase maxDepth.` );
             }
 
             return result;

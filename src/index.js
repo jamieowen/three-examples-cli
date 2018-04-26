@@ -1,5 +1,7 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
+
+const globAndGroup = require( './globAndGroup' );
 const gatherExampleInfo = require( './gatherExampleInfo' );
 const writeTransformed = require( './writeTransformed' );
 
@@ -37,8 +39,10 @@ if( !threePath ){
  * Traverse three.js examples and build import/export & folder info.
  */
 
-gatherExampleInfo( threePath, {} )
-    .then( ( info )=>{
+Promise.resolve()
+    .then( ()=>globAndGroup( threePath ) )
+    .then( (examples)=>gatherExampleInfo( threePath,examples ) )
+    .then( (info)=>{
 
         // console.log( 'MAP' , info );
 

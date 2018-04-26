@@ -52,7 +52,7 @@ module.exports = function( runMode, info, stats ){
 
                 },
 
-                ExpressionStatement: {
+                __ExpressionStatement: {
 
                     enter( path, state ){
     
@@ -315,8 +315,6 @@ module.exports = function( runMode, info, stats ){
                         console.log( '>', path.node.property.name, ' : ', pathHead.parentPath.node.type, path.node.loc.start );
                         
                     }
-
-                    // ObjectProperty, VariableDeclarator, BinaryExpression, ConditionalExpression, CallExpression
 
                 }             
 
