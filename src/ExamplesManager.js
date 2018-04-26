@@ -4,7 +4,8 @@ module.exports = class ExamplesManager{
     constructor( three ){
 
         this.globals = Object.keys( three );
-        
+        this.examples = []; 
+
         this.byPath = {};
         this.byGroup = {};
         this.byClass = {};
@@ -30,29 +31,43 @@ module.exports = class ExamplesManager{
 
     updateCircularRefs(){
 
-        console.log( 'update Circila refs' );
-        return;
         /**
-         * Detect circular dependencies.
+         * Detect cicular refs.
+         * Files that do contain cicular refs will be 
+         * split in two during transformation.
          */
-        let withMultipleExports = Object.keys( info.examples.byPath ).filter( (key)=>{
-            let ex = info.examples.byPath[ key ];
-            return ex.exports.length > 1;
-        })
+        for( let i = 0; i<this.examples.length; i++ ){
 
-        withMultipleExports.forEach( (path)=>{
-            let info = info.examples.byPath[ path ];
-            ex.exports.forEach( (cls)=>{
-                let exp = info.examples.byClass[ cls ];
-                let circ = info.isCircular( exp );
-            })
-        })
+            let info = this.examples[i];
 
-        console.log( Object.keys( info.examples.byPath ).length );
-        console.log( withMultipleExports.length );
-        console.log( withMultipleExports );
-        
+            if( info.imports.length > 0 ){
 
+                for( let j = 0; j<info.imports.length; j++ ){
+
+                    let imported = info.imports[j];
+                    let ref = this.byClass[ imported ];
+
+                    if( !ref ){
+                        console.log( 'COULD NOT FIND:', ref, imported );
+                    }
+                    for( let k = 0; k<info.exports.length; k++ ){
+
+                        let exp = info.exports[k];
+                        let idx = ref.imports.indexOf( exp );
+                        console.log( exp );
+                        if( idx > -1 ){
+                            // Circular Ref.
+                            console.log( 'Circ :', exp,ref.imports[idx] );
+                        }
+
+                    }
+
+
+                }
+
+            }
+
+        }
 
     }
 

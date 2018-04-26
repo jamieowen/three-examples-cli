@@ -38,7 +38,8 @@ module.exports = ( threePath, examples )=>{
     examples.forEach( ( example )=>{
 
         const info = new ExampleInfo( example.path,example.group,manager );
-
+        manager.examples.push( info );
+        
         queue = queue.then( ()=>{
 
             return new Promise( (resolve,reject )=>{
@@ -69,9 +70,10 @@ module.exports = ( threePath, examples )=>{
     });
 
     return queue.then( ( result )=>{
-        
-        manager.updateCircularRefs();
+
         spinner.stopAndPersist();
+        manager.updateCircularRefs();        
+
         return manager;
 
     })

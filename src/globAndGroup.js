@@ -18,7 +18,7 @@ module.exports = function globAndGroup( threePath ){
                 'examples/js/loaders/sea3d/**/*.*',
                 'examples/js/loaders/ctm/**/*.*',
     
-                'examples/js/loaders/NodeMaterialLoader.js',
+                // 'examples/js/loaders/NodeMaterialLoader.js',
                 'examples/js/loaders/PRWMLoader.js',
                 'examples/js/loaders/XLoader.js',
                 'examples/js/Octree.js',
@@ -34,13 +34,10 @@ module.exports = function globAndGroup( threePath ){
                 examples = examples.map( ( ex,i )=>{
 
                     const folders = ex.split( path.sep );
-                    let group = 'none';
-                    // examples/js/group/
-                    if( folders.length > 2 ){
-                        group = folders[ 2 ];                        
-                    }
-
-                    console.log( group, ': ', ex );
+                    /**
+                     * e.g : examples/js/group
+                     */                    
+                    const group = folders.length > 2 ? folders[2] : 'none';
 
                     return {
                         path: ex,
