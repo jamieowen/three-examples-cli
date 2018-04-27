@@ -1,3 +1,4 @@
+
 module.exports = class ExampleInfo{
 
     constructor( path,group,manager ){
@@ -10,7 +11,6 @@ module.exports = class ExampleInfo{
         this.exports = [];
         this.globals = [];
 
-        this.circularRefs = [];
         this.exportDefault = null;
         
     }
@@ -45,10 +45,47 @@ module.exports = class ExampleInfo{
         }        
 
     }
+    
+    detectCircularRefs( info ){
 
-    isCircular(){
+        const result = [];
+        if( info.path === this.path ){
+            return result;
+        }
 
-        return this.circularRefs.length > 0;
+        info.imports.forEach( ( imp )=>{
+
+            this.exports.forEach( ( exp )=>{
+
+                if( imp === exp ){
+
+                    this.imports.forEach( (imp2)=>{
+
+                        info.exports.forEach( (exp2)=>{
+                            
+                            if( imp2 === exp2 ){
+
+                                result.push( {
+                                    info: this,
+                                    ref:{
+                                        export: imp,
+                                        import: imp2
+                                    }                                    
+                                } );
+
+                            }
+
+                        })
+                        
+                    })
+
+                }
+
+            })            
+
+        })
+
+        return result;
 
     }
 

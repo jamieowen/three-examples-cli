@@ -38,8 +38,7 @@ module.exports = ( threePath, examples )=>{
     examples.forEach( ( example )=>{
 
         const info = new ExampleInfo( example.path,example.group,manager );
-        manager.examples.push( info );
-        
+
         queue = queue.then( ()=>{
 
             return new Promise( (resolve,reject )=>{
@@ -56,7 +55,8 @@ module.exports = ( threePath, examples )=>{
                         reject(err);
                     }else{
 
-                        manager.updateIndexes( info );
+                        // add after transform
+                        manager.addExample( info );
                         resolve( result );
 
                     }                        
