@@ -1,3 +1,4 @@
+const path = require( 'path' );
 
 module.exports = class ExamplesManager{
 
@@ -12,6 +13,7 @@ module.exports = class ExamplesManager{
 
         this.circularRefs = [];
         this.resolvedCircularRefs = [];
+        this.unresolvedCircularRefs = [];
 
     }
 
@@ -64,22 +66,26 @@ module.exports = class ExamplesManager{
         });
 
         this.resolvedCircularRefs.splice(0);
-        const isResolved = {};
+        this.unresolvedCircularRefs.splice(0);
 
-        /**
-         * Create an id for a circular ref.
-         * As we will have generated two circ ref objects,
-         * A > B & B > A, we will only resolve once
-         * and that should work.
-         */
-        const createId = ( imp,exp )=>{
+        const resolutions = [];
+        const writePathCount = {};
 
-            const lookup = [ imp,exp ].sort( (a,b)=>{
-                return b - a;
-            })
+        const createWritePath = ( info, cls )=>{
 
-            console.log( 'LOOKUP', lookup );
-            return lookup.join( '_' );
+            let parts = info.path.split( path.sep );
+            parts[ parts.length-1 ] = cls + '.js';
+            return parts.join( path.sep );
+
+        }
+
+        const incrementWritePath = ( writePath )=>{
+
+            if( writePathCount[ writePath ] === undefined ){
+                writePathCount[ writePath ] = 1;
+            }else{
+                writePathCount[ writePath ]++;
+            }
 
         }
 
@@ -88,54 +94,91 @@ module.exports = class ExamplesManager{
             const ref = circ.ref;
             const imp = this.byClass[ ref.import ];
             const exp = this.byClass[ ref.export ];
-            const id = createId( ref.import, ref.export );
 
-            if( isResolved[id] === undefined ){
-                isResolved[id] = {
-                    id: id,
-                    result: false,
-                    circ: circ,
-                    import: imp,
-                    export: exp                    
-                }
-            }
+            const result = {
+                resolveImport: false,
+                resolveExport: false,
+                circ: circ,
+                import: imp,
+                export: exp,
+                splitClass: null,
+                writePath: null 
+            };
+
+            resolutions.push( result );
 
             /**
              * Resolve by checking if the target is 
-             * not the exportDefault and that we have
-             * multiple exports, in which case we
+             * not the exportDefault on both sides, in which case we
              * should be able to split this class in to
-             * a seperate file.
+             * a separate file.
+             * 
+             * Also, count up the results of one side vs
+             * the other to choose the least number
+             * of splits possible and choose one option over
+             * the other if the same split file is resolved
+             * multiple times.
              */
-            if( !isResolved[id].result ){
 
-                if( 
-                    circ.ref.export !== exp.exportDefault &&
-                    exp.exports.length > 1
-                ){
+            if( circ.ref.export !== exp.exportDefault ){
 
-                    isResolved[id].result = true;
-                    console.log( 'Resolved', id, exp.path );
+                result.resolveExport = true;
+                result.splitClass = circ.ref.export;
+                result.writePath = createWritePath( exp, circ.ref.export );
+                incrementWritePath( result.writePath );
+            }
 
-                }
+            if( circ.ref.import !== imp.exportDefault ){
+
+                result.resolveImport = true;
+                result.splitClass = circ.ref.import;
+                result.writePath = createWritePath( imp, circ.ref.import );
+                incrementWritePath( result.writePath );
 
             }
 
         });
 
-        const unresolved = Object.keys( isResolved )
-            .map( (id)=>{
-                return isResolved[id];
-            })
-            .filter( (res)=>{
-                return !res.result;
-            })
+        const unresolved = resolutions.filter( (res)=>{
+            return !res.resolveImport && !res.resolveExport;
+        })
 
+        const resolved = resolutions.filter( (res)=>{
+            return res.resolveImport || res.resolveExport;
+        })
+
+        /**
+         * Optimize to use optimal split via
+         * import or via export.
+         */
         unresolved.forEach( (un)=>{
 
-            console.log( 'Unresolved:', un.id );
+            console.log( 'Unresolved:', un.circ.ref.import, un.circ.ref.export );
             
         })
+
+        resolved.forEach( (res)=>{
+
+            if( res.resolveExport && res.resolveImport ){
+
+                const impWritePath = createWritePath( res.import, res.circ.ref.import );
+                const expWritePath = createWritePath( res.export, res.circ.ref.export );
+
+                if( writePathCount[ impWritePath ] > writePathCount[ expWritePath ] ){
+                    res.splitClass = res.circ.ref.import;
+                    res.writePath = impWritePath;
+                }else{
+                    res.splitClass = res.circ.ref.export;
+                    res.writePath = expWritePath;
+                }
+
+            }
+
+            console.log( 'Resolved:', res.splitClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
+            
+        })
+
+        console.log( writePathCount );
 
     }
 
