@@ -35,6 +35,8 @@ if( !threePath ){
     }
 }
 
+const writePath = path.join( threePath, 'ex' );
+
 /**
  * Traverse three.js examples and build import/export & folder info.
  */
@@ -42,9 +44,9 @@ if( !threePath ){
 Promise.resolve()
     .then( ()=>globAndGroup( threePath ) )
     .then( (examples)=>gatherExampleInfo( threePath,examples ) )
-    .then( (info)=>filterInfo( info ) )
-    .then( (info)=>writeTransformed( info ) )
-    .then( (info)=>{
+    .then( (manager)=>filterInfo( manager ) )
+    .then( (manager)=>writeTransformed( threePath,writePath,manager ) )
+    .then( (manager)=>{
 
         console.log( 'Done..' );
         // console.log( 'MAP' , info );

@@ -1,7 +1,7 @@
 
 const astExtra = require( './ast' );
 
-module.exports = function( runMode, info, stats ){
+module.exports = function( runMode, info, stats={} ){
 
     const RUN_MODE = {
         INFO: 'gather',
@@ -121,10 +121,9 @@ module.exports = function( runMode, info, stats ){
                      * const quat = new THREE.Quaternion(); ( Import )
                      */        
                     if( valid && t.isNewExpression( pathHead.parentPath ) ){
-
-                        incrementStat( 'NewExpression' );
-
+                    
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'NewExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -138,9 +137,8 @@ module.exports = function( runMode, info, stats ){
                     if( valid && t.isAssignmentExpression( pathHead.parentPath ) &&
                         pathHead.parentPath.node.left === pathHead.node ){
                         
-                        incrementStat( 'AssignmentExpression_Left' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'AssignmentExpression_Left' );
                             info.addExport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -154,9 +152,8 @@ module.exports = function( runMode, info, stats ){
                     if( valid && t.isAssignmentExpression( pathHead.parentPath ) &&
                         pathHead.parentPath.node.right === pathHead.node ){
 
-                        incrementStat( 'AssignmentExpression_Right' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'AssignmentExpression_Right' );                            
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -169,9 +166,8 @@ module.exports = function( runMode, info, stats ){
                      */                     
                     if( valid && t.isObjectProperty( pathHead.parentPath ) ){
 
-                        incrementStat( 'ObjectProperty' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'ObjectProperty' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -184,9 +180,8 @@ module.exports = function( runMode, info, stats ){
                      */        
                     if( valid && t.isCallExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'CallExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'CallExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -200,9 +195,8 @@ module.exports = function( runMode, info, stats ){
                      */
                     if( valid && t.isBinaryExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'BinaryExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'BinaryExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -219,9 +213,8 @@ module.exports = function( runMode, info, stats ){
                      */        
                     if( valid && t.isArrayExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'ArrayExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'ArrayExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -234,9 +227,8 @@ module.exports = function( runMode, info, stats ){
                      */
                     if( valid && t.isConditionalExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'ConditionalExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'ConditionalExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -247,11 +239,10 @@ module.exports = function( runMode, info, stats ){
                     /**
 //                     * case THREE.ColorAdjustmentNode.SATURATION:                      
                      */
-                    if( valid && t.isSwitchCase( pathHead.parentPath ) ){
-
-                        incrementStat( 'SwitchCase' );
+                    if( valid && t.isSwitchCase( pathHead.parentPath ) ){                        
 
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'SwitchCase' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -264,9 +255,8 @@ module.exports = function( runMode, info, stats ){
                      */
                     if( valid && t.isVariableDeclarator( pathHead.parentPath ) ){
 
-                        incrementStat( 'VariableDeclarator' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'VariableDeclarator' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -279,9 +269,8 @@ module.exports = function( runMode, info, stats ){
                      */                    
                     if( valid && t.isLogicalExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'LogicalExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'LogicalExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -294,9 +283,8 @@ module.exports = function( runMode, info, stats ){
                      */                    
                     if( valid && t.isReturnStatement( pathHead.parentPath ) ){
 
-                        incrementStat( 'ReturnStatement' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'ReturnStatement' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){
@@ -310,9 +298,8 @@ module.exports = function( runMode, info, stats ){
                      */                    
                     if( valid && t.isUnaryExpression( pathHead.parentPath ) ){
 
-                        incrementStat( 'UnaryExpression' );
-
                         if( RUN_MODE.INFO ){
+                            incrementStat( 'UnaryExpression' );
                             info.addImport( path.node.property.name );
                         }else
                         if( RUN_MODE.TRANSFORM ){

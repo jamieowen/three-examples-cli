@@ -35,6 +35,7 @@ test( 'Resolve Circular Refs', (t)=>{
 
     manager.updateCircularRefs();
     console.log( manager.circularRefs );
+    // temp..
     t.is( 1,1 );
 
 });

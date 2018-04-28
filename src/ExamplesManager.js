@@ -110,20 +110,25 @@ module.exports = class ExamplesManager{
             /**
              * Resolve by checking if the target is 
              * not the exportDefault on both sides, in which case we
-             * should be able to split this class in to
+             * should be able to extract this class in to
              * a separate file.
              * 
              * Also, count up the results of one side vs
-             * the other to choose the least number
-             * of splits possible and choose one option over
-             * the other if the same split file is resolved
-             * multiple times.
+             * the other to optimize for the least number
+             * of new files possible. And choose one side over
+             * the other if both are valid and the same extracted
+             * multiple times for the other circular refs.
+             * e.g This is logic for the EffectComposer, MaskPass,ShaderPass
+             * classes. All Passes are referencing the Pass defined in
+             * EffectComposer but the EffectComposer is importing 
+             * them also.
+             * 
              */
 
             if( circ.ref.export !== exp.exportDefault ){
 
                 result.resolveExport = true;
-                result.splitClass = circ.ref.export;
+                result.extractClass = circ.ref.export;
                 result.writePath = createWritePath( exp, circ.ref.export );
                 incrementWritePath( result.writePath );
             }
@@ -131,7 +136,7 @@ module.exports = class ExamplesManager{
             if( circ.ref.import !== imp.exportDefault ){
 
                 result.resolveImport = true;
-                result.splitClass = circ.ref.import;
+                result.extractClass = circ.ref.import;
                 result.writePath = createWritePath( imp, circ.ref.import );
                 incrementWritePath( result.writePath );
 
@@ -165,20 +170,18 @@ module.exports = class ExamplesManager{
                 const expWritePath = createWritePath( res.export, res.circ.ref.export );
 
                 if( writePathCount[ impWritePath ] > writePathCount[ expWritePath ] ){
-                    res.splitClass = res.circ.ref.import;
+                    res.extractClass = res.circ.ref.import;
                     res.writePath = impWritePath;
                 }else{
-                    res.splitClass = res.circ.ref.export;
+                    res.extractClass = res.circ.ref.export;
                     res.writePath = expWritePath;
                 }
 
             }
 
-            console.log( 'Resolved:', res.splitClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
+            console.log( 'Resolved:', res.extractClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
             
         })
-
-        console.log( writePathCount );
 
     }
 
