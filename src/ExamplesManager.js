@@ -11,16 +11,6 @@ module.exports = class ExamplesManager{
         this.byGroup = {};
         this.byClass = {};
 
-        this.circularRefs = [];
-        this.resolvedCircularRefs = [];
-        this.unresolvedCircularRefs = [];
-
-    }
-
-    isGlobal( cls ){
-        
-        return this.globals.indexOf( cls ) > -1;
-
     }
 
     addExample( info ){
@@ -32,7 +22,12 @@ module.exports = class ExamplesManager{
         }
 
         this.byPath[ info.path ] = info;
-        this.byGroup[ info.group ] = info;
+
+        if( this.byGroup[info.group] === undefined ){
+            this.byGroup[info.group] = [];
+        }
+
+        this.byGroup[info.group].push( info );
 
         info.exports.forEach( (ex)=>{
             this.byClass[ ex ] = info;
@@ -40,24 +35,104 @@ module.exports = class ExamplesManager{
 
     }
 
+    _getImportsRecursive( imports,accum=[],visited={} ){
+    
+        for( let i=0; i<imports.length; i++ ){
+
+            let imp = imports[i];
+
+            if( visited[imp] === undefined ){
+
+                visited[ imp ] = true;
+                accum.push( imp );
+
+                let info = this.byClass[ imp ];
+                this._getImportsRecursive( info.imports,accum,visited );
+
+            }
+
+        }
+
+    }
+
+    findAllImports( info ){
+
+        const visited = {};
+        info.exports.forEach( (exp)=>{
+            visited[exp] = true;
+        });
+
+        const accum = [];
+        this._getImportsRecursive( info.imports,accum,visited );
+        return accum;
+
+    }
+
+    removeExample( info ){
+
+        const idx = this.examples.indexOf( info );
+
+        if( idx > -1 ){   
+
+            this.examples.splice( idx,1 );
+
+            this.byPath[ info.path ] = undefined;
+            delete this.byPath[ info.path ];
+
+            const groupItems = this.byGroup[info.group]
+
+            if( groupItems ){
+                const gidx = groupItems.indexOf(info);
+                if( gidx > -1 ){
+                    groupItems.splice( gidx,1 );
+                }
+            }
+
+            info.exports.forEach( (ex)=>{
+                this.byClass[ ex ] = undefined;
+                delete this.byClass[ ex ];
+            })
+
+        }
+
+    }
+
+    isGlobal( cls ){
+        
+        return this.globals.indexOf( cls ) > -1;
+
+    }
+
+    isMissingImports( info ){
+
+        const failed = info.imports.filter( (imp)=>{
+            return this.byClass[ imp ] === undefined;
+        });
+
+        if( failed.length > 0 ){
+            return failed;
+        }else{
+            return false;
+        }    
+    }    
+
     /**
-     * Update the circular ref list.
+     * Resolve circular refs.
      * 
      * Files that do contain cicular refs will be 
      * have multiple classes exported to different
      * files during transformation. This is providing
      * that the files in question can be split.
      */
-    updateCircularRefs(){
-
-        this.circularRefs.splice(0);
+    resolveCircularRefs(){
         
-        // Detect Refs
+        let circularRefs = [];
+
         this.examples.forEach( (current)=>{
 
             this.examples.forEach( (target)=>{
 
-                this.circularRefs = this.circularRefs.concat(
+                circularRefs = circularRefs.concat(
                     current.detectCircularRefs( target )
                 ); 
 
@@ -65,8 +140,6 @@ module.exports = class ExamplesManager{
 
         });
 
-        this.resolvedCircularRefs.splice(0);
-        this.unresolvedCircularRefs.splice(0);
 
         const resolutions = [];
         const writePathCount = {};
@@ -89,7 +162,7 @@ module.exports = class ExamplesManager{
 
         }
 
-        this.circularRefs.forEach( ( circ )=>{
+        circularRefs.forEach( ( circ )=>{
 
             const ref = circ.ref;
             const imp = this.byClass[ ref.import ];
@@ -116,8 +189,9 @@ module.exports = class ExamplesManager{
              * Also, count up the results of one side vs
              * the other to optimize for the least number
              * of new files possible. And choose one side over
-             * the other if both are valid and the same extracted
+             * the other if both are valid and the same class is extracted
              * multiple times for the other circular refs.
+             * 
              * e.g This is logic for the EffectComposer, MaskPass,ShaderPass
              * classes. All Passes are referencing the Pass defined in
              * EffectComposer but the EffectComposer is importing 
@@ -131,6 +205,7 @@ module.exports = class ExamplesManager{
                 result.extractClass = circ.ref.export;
                 result.writePath = createWritePath( exp, circ.ref.export );
                 incrementWritePath( result.writePath );
+
             }
 
             if( circ.ref.import !== imp.exportDefault ){
@@ -162,6 +237,8 @@ module.exports = class ExamplesManager{
             
         })
 
+        const extract = {};
+
         resolved.forEach( (res)=>{
 
             if( res.resolveExport && res.resolveImport ){
@@ -180,8 +257,34 @@ module.exports = class ExamplesManager{
             }
 
             console.log( 'Resolved:', res.extractClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
+
+            if( !extract[ res.extractClass ] ){
+
+                extract[ res.extractClass ] = {
+                    input: res.circ.info.path,
+                    extractClass: res.extractClass,
+                    output: res.writePath
+                }
+
+                /**
+                 * Create an extract ref to all other exports in that class.
+                 */
+                res.circ.info.exports.forEach( (exp)=>{
+
+                    if( !extract[ exp ] ){
+                        extract[ exp ] = {
+                            input: res.circ.info.path,
+                            output: createWritePath( res.circ.info, exp ),
+                            extractClass: exp
+                        }
+                    }
+                })
+
+            }
             
         })
+
+        return { resolved,unresolved,extract }
 
     }
 

@@ -12,6 +12,11 @@ module.exports = class ExampleInfo{
         this.globals = [];
 
         this.exportDefault = null;
+
+        /**
+         * Exclude all files by default. They will be added in the filter process.
+         */
+        this.include = false; 
         
     }
 

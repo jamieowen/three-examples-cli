@@ -1,20 +1,35 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
+const yargs = require('yargs');
 
 const globAndGroup = require( './globAndGroup' );
+const addGroupArgs = require( './addGroupArgs' );
 const gatherExampleInfo = require( './gatherExampleInfo' );
 const filterInfo = require( './filterInfo' );
 const writeTransformed = require( './writeTransformed' );
 
-// var argv = require('yargs')
-//   .option('size', {
-//     alias: 's',
-//     describe: 'choose a size',
-//     choices: ['xs', 's', 'm', 'l', 'xl']
-//   })
-//   .help()
-//   .argv
+/**
+ * Add general arguments.
+ */
 
+yargs.option( 'output', {
+    // alias: 's',
+    describe: `Set the destination output folder.`,
+});
+
+yargs.option( 'three', {
+    describe: `Provide a specific path to three.js`,
+} )
+
+yargs.option( 'cache', {
+    // alias: 's',
+    describe: `Cache the initial ast traversal.`,
+});
+
+yargs.option( 'dry-run', {
+    // alias: 's',
+    describe: `Output the paths to converted files.`,
+});
 
 /**
  * Resolve path to three.js.
@@ -37,16 +52,26 @@ if( !threePath ){
 
 const writePath = path.join( threePath, 'ex' );
 
-/**
- * Traverse three.js examples and build import/export & folder info.
- */
+ /**
+  * Populated and passed through via various tasks below.
+  */
+const state = {
+    yargs: yargs,
+    argv: null,
+    examples: null,    
+    manager: null,
+    output: null,
+    threePath: threePath,
+    writePath: writePath
+}
 
 Promise.resolve()
-    .then( ()=>globAndGroup( threePath ) )
-    .then( (examples)=>gatherExampleInfo( threePath,examples ) )
-    .then( (manager)=>filterInfo( manager ) )
-    .then( (manager)=>writeTransformed( threePath,writePath,manager ) )
-    .then( (manager)=>{
+    .then( ()=>globAndGroup( state ) ) // Populate state.examples.
+    .then( ()=>addGroupArgs( state ) ) // Populate state.argv with groups.
+    .then( ()=>gatherExampleInfo( state ) ) // Populate state.manager.
+    .then( ()=>filterInfo( state ) ) // Apply filters to state.manager and generate output list.
+    .then( ()=>writeTransformed( state ) ) // Transform and write output list.
+    .then( ()=>{
 
         console.log( 'Done..' );
         // console.log( 'MAP' , info );

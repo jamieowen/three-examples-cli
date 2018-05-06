@@ -1,10 +1,12 @@
 const path = require( 'path' );
 const glob = require( 'glob' );
 
-module.exports = function globAndGroup( threePath ){
+module.exports = function globAndGroup( state ){
 
     return new Promise(( resolve,reject )=>{
 
+        const threePath = state.threePath;
+        
         glob( 'examples/js/**/*.js', {
             cwd: threePath,
             ignore: [
@@ -46,7 +48,8 @@ module.exports = function globAndGroup( threePath ){
             
                 })
                 
-                resolve( examples );
+                state.examples = examples;
+                resolve( state );
 
             }
 

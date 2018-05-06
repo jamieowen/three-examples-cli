@@ -9,8 +9,11 @@ const ExampleInfo = require( './ExampleInfo' );
 const ExamplesManager = require( './ExamplesManager' );
 
 
-module.exports = ( threePath, examples )=>{
+module.exports = ( state )=>{
     
+    const threePath = state.threePath;
+    const examples = state.examples;
+
     const three = require( threePath );
     const manager = new ExamplesManager( three );
 
@@ -72,9 +75,9 @@ module.exports = ( threePath, examples )=>{
     return queue.then( ( result )=>{
 
         spinner.stopAndPersist();
-        manager.updateCircularRefs();        
 
-        return manager;
+        state.manager = manager;
+        return state;
 
     })
     

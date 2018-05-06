@@ -1,5 +1,6 @@
-
+const pathUtil = require( 'path' );
 const astExtra = require( './ast' );
+
 
 module.exports = function( runMode, info, stats={} ){
 
@@ -42,9 +43,7 @@ module.exports = function( runMode, info, stats={} ){
                     },
                     exit: ( path, state )=>{
 
-
-
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
 
                             /**
                              * Validate/Filter imports. There are cases where we will not be able to 
@@ -58,7 +57,35 @@ module.exports = function( runMode, info, stats={} ){
                             })
 
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
+
+                            console.log( 'RUNMODE TRANSFORM', info.path, info.imports, typeof info.imports.forEach );
+                            const importNodes = info.imports.map( ( imp )=>{
+
+                                // determine relative path.
+                                console.log( 'FIND RELATIVE :', imp );
+                                const from = info.path;
+                                const to = info.manager.byClass[ imp ].path;
+                                const relativePath = pathUtil.relative( from, to );
+                                console.log( 'RELATIVE', relativePath );
+
+                                return t.importDeclaration( [
+                                    t.importSpecifier( t.identifier( imp ), t.identifier( imp ) )
+                                ], t.stringLiteral( relativePath ) );
+                                
+                            } );
+
+                            const globalNodes = info.globals.map( ( imp )=>{
+                                return t.importSpecifier( t.identifier( imp ), t.identifier( imp ) )
+                            })
+
+                            importNodes.forEach( (importNode)=>{
+                                path.unshiftContainer( 'body', importNode )
+                            } )
+
+                            path.unshiftContainer( 'body', 
+                                t.importDeclaration( globalNodes, t.stringLiteral( 'three' ) ) 
+                            );
 
                         }
 
@@ -89,7 +116,7 @@ module.exports = function( runMode, info, stats={} ){
                          * 
                          */
 
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                             if( t.isProgram( path.getFunctionParent() ) ){
     
@@ -122,11 +149,11 @@ module.exports = function( runMode, info, stats={} ){
                      */        
                     if( valid && t.isNewExpression( pathHead.parentPath ) ){
                     
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'NewExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -137,11 +164,11 @@ module.exports = function( runMode, info, stats={} ){
                     if( valid && t.isAssignmentExpression( pathHead.parentPath ) &&
                         pathHead.parentPath.node.left === pathHead.node ){
                         
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'AssignmentExpression_Left' );
                             info.addExport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
                             
                         }
                         
@@ -152,11 +179,11 @@ module.exports = function( runMode, info, stats={} ){
                     if( valid && t.isAssignmentExpression( pathHead.parentPath ) &&
                         pathHead.parentPath.node.right === pathHead.node ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'AssignmentExpression_Right' );                            
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
                             
                         }
 
@@ -166,11 +193,11 @@ module.exports = function( runMode, info, stats={} ){
                      */                     
                     if( valid && t.isObjectProperty( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'ObjectProperty' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -180,11 +207,11 @@ module.exports = function( runMode, info, stats={} ){
                      */        
                     if( valid && t.isCallExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'CallExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -195,11 +222,11 @@ module.exports = function( runMode, info, stats={} ){
                      */
                     if( valid && t.isBinaryExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'BinaryExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -213,11 +240,11 @@ module.exports = function( runMode, info, stats={} ){
                      */        
                     if( valid && t.isArrayExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'ArrayExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -227,11 +254,11 @@ module.exports = function( runMode, info, stats={} ){
                      */
                     if( valid && t.isConditionalExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'ConditionalExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -241,11 +268,11 @@ module.exports = function( runMode, info, stats={} ){
                      */
                     if( valid && t.isSwitchCase( pathHead.parentPath ) ){                        
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'SwitchCase' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -255,11 +282,11 @@ module.exports = function( runMode, info, stats={} ){
                      */
                     if( valid && t.isVariableDeclarator( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'VariableDeclarator' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -269,11 +296,11 @@ module.exports = function( runMode, info, stats={} ){
                      */                    
                     if( valid && t.isLogicalExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'LogicalExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -283,11 +310,11 @@ module.exports = function( runMode, info, stats={} ){
                      */                    
                     if( valid && t.isReturnStatement( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'ReturnStatement' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
@@ -298,11 +325,11 @@ module.exports = function( runMode, info, stats={} ){
                      */                    
                     if( valid && t.isUnaryExpression( pathHead.parentPath ) ){
 
-                        if( RUN_MODE.INFO ){
+                        if( runMode === RUN_MODE.INFO ){
                             incrementStat( 'UnaryExpression' );
                             info.addImport( path.node.property.name );
                         }else
-                        if( RUN_MODE.TRANSFORM ){
+                        if( runMode === RUN_MODE.TRANSFORM ){
 
                         }
                         
