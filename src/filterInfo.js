@@ -4,7 +4,7 @@ module.exports = function filterInfo( state ){
     const argv = state.argv;
     const manager = state.manager;
 
-    return new Promise( ( resolve, reject )=>{
+    return Promise.resolve().then( ()=>{
 
         /**
          * All examples files are excluded by default.
@@ -35,20 +35,47 @@ module.exports = function filterInfo( state ){
 
         const circRes = manager.resolveCircularRefs();
         const outputFiles = [];
+
+        const modifyOutputPath = ( path )=>{
+            return path.split( '/' ).slice( 2 ).join( '/' );
+        }
+
         /**
          * Build the expected write paths
          */
         manager.examples.forEach( (info)=>{
 
-            if(info.include){
+            if( info.include ){
 
-                outputFiles.push( {
-                    input: info.path,
-                    output: info.path
-                })
+                let willExtract = info.exports.length > 0 ? true : false;
+
+                info.exports.forEach( (exp)=>{
+                    willExtract = willExtract && circRes.extract[ exp ] !== undefined;
+                }); 
+
+                if( !willExtract ){
+
+                    outputFiles.push( {
+                        info: info,
+                        input: info.path,
+                        output: modifyOutputPath( info.path )
+                    })
+
+                }
 
             }
         })
+
+        /**
+         * Add extracted classes, those that need to be split
+         * due to a circular ref problem.
+         */
+
+         for( let key in circRes.extract ){
+            let ex = circRes.extract[ key ];
+            ex.output = modifyOutputPath( ex.output );
+            outputFiles.push( ex );
+         }
         
         outputFiles.forEach( ( f )=>{
 
@@ -57,11 +84,8 @@ module.exports = function filterInfo( state ){
 
         })
 
-        console.log( circRes.extract );
-        
-
-        process.exit();
-        // resolve( manager );        
+        state.output = outputFiles;
+        return state;       
 
     })
 

@@ -27,8 +27,10 @@ module.exports = class ExamplesManager{
             this.byGroup[info.group] = [];
         }
 
-        this.byGroup[info.group].push( info );
-
+        if( this.byGroup[info.group].indexOf(info) === -1 ){
+            this.byGroup[info.group].push( info );
+        }
+        
         info.exports.forEach( (ex)=>{
             this.byClass[ ex ] = info;
         });
@@ -260,8 +262,11 @@ module.exports = class ExamplesManager{
 
             if( !extract[ res.extractClass ] ){
 
+                const info = res.circ.info;
+
                 extract[ res.extractClass ] = {
-                    input: res.circ.info.path,
+                    info: info.cloneAndExtractForClass( res.extractClass,res.writePath,true ),
+                    input: info.path,
                     extractClass: res.extractClass,
                     output: res.writePath
                 }
@@ -269,12 +274,14 @@ module.exports = class ExamplesManager{
                 /**
                  * Create an extract ref to all other exports in that class.
                  */
-                res.circ.info.exports.forEach( (exp)=>{
+                info.exports.forEach( (exp)=>{
 
+                    const writePath = createWritePath( res.circ.info, exp );
                     if( !extract[ exp ] ){
                         extract[ exp ] = {
-                            input: res.circ.info.path,
-                            output: createWritePath( res.circ.info, exp ),
+                            info: info.cloneAndExtractForClass( exp,writePath,true ),
+                            input: info.path,
+                            output: writePath,
                             extractClass: exp
                         }
                     }

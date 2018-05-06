@@ -59,15 +59,14 @@ module.exports = function( runMode, info, stats={} ){
                         }else
                         if( runMode === RUN_MODE.TRANSFORM ){
 
-                            console.log( 'RUNMODE TRANSFORM', info.path, info.imports, typeof info.imports.forEach );
+                            // console.log( 'RUNMODE TRANSFORM', info.path, info.imports, typeof info.imports.forEach );
                             const importNodes = info.imports.map( ( imp )=>{
 
-                                // determine relative path.
-                                console.log( 'FIND RELATIVE :', imp );
-                                const from = info.path;
+                                // Determine relative path.
+
+                                const from = info.path.split(pathUtil.sep).slice(0,-1).join(pathUtil.sep);
                                 const to = info.manager.byClass[ imp ].path;
-                                const relativePath = pathUtil.relative( from, to );
-                                console.log( 'RELATIVE', relativePath );
+                                const relativePath = `./` + pathUtil.relative( from, to ).replace( '.js', '' );
 
                                 return t.importDeclaration( [
                                     t.importSpecifier( t.identifier( imp ), t.identifier( imp ) )

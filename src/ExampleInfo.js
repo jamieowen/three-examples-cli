@@ -51,6 +51,50 @@ module.exports = class ExampleInfo{
 
     }
     
+    clone(){
+
+        const clone = new ExampleInfo();
+        clone.path = this.path;
+        clone.group = this.group;
+        clone.manager = this.manager;
+        clone.imports = [].concat( this.imports );
+        clone.exports = [].concat( this.exports );
+        clone.globals = [].concat( this.globals );
+
+        clone.exportDefault = this.exportDefault;        
+        clone.include = this.include;
+        
+        return clone;
+
+    }
+
+    cloneAndExtractForClass( cls,newPath,updateManager=true ){
+
+        const clone = this.clone();
+        clone.path = newPath;
+        clone.exportDefault = cls;
+        clone.exports = [ cls ];
+
+        if( updateManager ){
+
+            const man = this.manager;
+            man.byClass[ cls ] = clone;
+            man.byPath[ newPath ] = clone;
+            if( !man.byGroup[ clone.group ] ){
+                man.byGroup[ clone.group ] = [];
+            }
+            man.byGroup[ clone.group ].push( clone );
+
+        }
+
+        // TODO : It may be possible that we have to import
+        // classes that were defined in the file we originally
+        // existed in.
+
+        return clone;
+
+    }
+
     detectCircularRefs( info ){
 
         const result = [];
