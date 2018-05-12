@@ -19,7 +19,8 @@ module.exports = function globAndGroup( state ){
     
                 'examples/js/loaders/sea3d/**/*.*',
                 'examples/js/loaders/ctm/**/*.*',
-    
+                
+                // 'examples/js/math/ColorConverter.js',
                 // 'examples/js/loaders/NodeMaterialLoader.js',
                 'examples/js/loaders/PRWMLoader.js',
                 'examples/js/loaders/XLoader.js',

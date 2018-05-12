@@ -7,6 +7,8 @@ const transformPlugin = require( './transformPlugin' );
 
 module.exports = ( state )=>{
 
+    // return Promise.resolve();
+
     console.log( 'Write Files' );
 
     let queue = Promise.resolve();  

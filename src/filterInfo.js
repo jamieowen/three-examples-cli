@@ -77,12 +77,12 @@ module.exports = function filterInfo( state ){
             outputFiles.push( ex );
          }
         
-        outputFiles.forEach( ( f )=>{
+        // outputFiles.forEach( ( f )=>{
 
-            console.log( f.input );
-            console.log( '      ', f.output );
+        //     console.log( f.input );
+        //     console.log( '      ', f.output );
 
-        })
+        // })
 
         state.output = outputFiles;
         return state;       
