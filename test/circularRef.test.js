@@ -33,7 +33,7 @@ test( 'Test ExampleInfo.hasCircularRef()', (t)=> {
 
 test( 'Resolve Circular Refs', (t)=>{
 
-    manager.updateCircularRefs();
+    manager.resolveCircularRefs();
     console.log( manager.circularRefs );
     // temp..
     t.is( 1,1 );

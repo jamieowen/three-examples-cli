@@ -14,6 +14,10 @@
     "ora": "^2.0.0",
     "yargs": "^11.0.0"
   },
+  "scripts": {
+    "test": "ava test/**/*.test.js",
+    "test:watch": "ava test/**/*.test.js --watch"
+  },
   "peerDependencies": {
     "three": "^0.92.0"
   },

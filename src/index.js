@@ -7,6 +7,7 @@ const addGroupArgs = require( './addGroupArgs' );
 const gatherExampleInfo = require( './gatherExampleInfo' );
 const filterInfo = require( './filterInfo' );
 const writeTransformed = require( './writeTransformed' );
+const extractClasses = require( './extractClasses' );
 
 /**
  * Add general arguments.
@@ -70,6 +71,7 @@ Promise.resolve()
     .then( ()=>addGroupArgs( state ) ) // Populate state.argv with groups.
     .then( ()=>gatherExampleInfo( state ) ) // Populate state.manager.
     .then( ()=>filterInfo( state ) ) // Apply filters to state.manager and generate output list.
+    .then( ()=>extractClasses( state ) ) // Extract problematic circular reference classes.
     .then( ()=>writeTransformed( state ) ) // Transform and write output list.
     .then( ()=>{
 
