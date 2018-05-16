@@ -23,7 +23,17 @@ module.exports = ( state )=>{
             return new Promise( (resolve,reject )=>{
 
                 // Transform File.
-                babel.transformFile( path.join( state.threePath, outputItem.input ), {
+                let codeOrPath, transformFunc
+                if( outputItem.extractClass && outputItem.code ){
+                    transformFunc = 'transform';
+                    codeOrPath = outputItem.code;
+                    console.log( 'Extracted', outputItem.extractClass );
+                }else{
+                    transformFunc = 'transformFile';
+                    codeOrPath = path.join( state.threePath, outputItem.input );
+                }
+
+                babel[ transformFunc ]( codeOrPath, {
                     plugins: [ 
                         transformPlugin( 'transform', outputItem.info ) // pass arguments in here..
                     ]
@@ -31,10 +41,8 @@ module.exports = ( state )=>{
         
                     if( err ){
                         reject(err);
-                    }else{
-
-                        resolve( result );
-
+                    }else{    
+                        resolve( result );    
                     }                        
         
                 } )

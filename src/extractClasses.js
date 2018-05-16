@@ -1,12 +1,23 @@
 
+const babel = require( '@babel/core' );
+const path = require( 'path' );
 const extractClassPlugin = require( './extractClassPlugin' );
+const transformPlugin = require( './transformPlugin' );
 
 /**
- * Additional step to extract classes that have are causing
- * circular reference problems.
  * 
- * These classes are seperated into seperate files, and we must
+ * Additional step to extract classes that are causing
+ * circular reference problems. e.g. : EffectComposer, Pass.
+ * 
+ * These classes are transformed into separate files, and we must
  * re-evaluate their imports/exports after the class has been extracted.
+ * 
+ * The process consists of 2 steps.
+ * 1. ( extractClassPlugin ) generates code that contains the isolated extractClass.
+ * 2. ( transformPlugin ) runs in the INFO mode and rebuilds imports for that class alone.
+ * 
+ * The final code is stored in the outputItem and used in the typical writeTransformed process.
+ * 
  */
 module.exports = function( state ){
 
@@ -19,13 +30,17 @@ module.exports = function( state ){
         console.log( 'EXTRACT CLASSES: ', extractOutputs );
 
         let queue = Promise.resolve();
-
+        
+        /**
+         * Create extracted class versions.
+         */
         extractOutputs.forEach( ( extractItem )=>{
 
             queue = queue.then( ()=>{
 
                 return new Promise( (resolve,reject )=>{
-    
+                    
+                    console.log( 'EXTRACT ITEM : ', extractItem.extractClass, extractItem.info.exports );
                     babel.transformFile( path.join( state.threePath, extractItem.input ), {
                         plugins: [ 
                             extractClassPlugin( extractItem.extractClass, extractItem.info )
@@ -35,7 +50,42 @@ module.exports = function( state ){
                         if( err ){
                             reject(err);
                         }else{    
-                            resolve( result );
+                            extractItem.code = result.code;  
+                            console.log( "CODE : ", extractItem.code );                          
+                            resolve( extractItem );
+                        }
+            
+                    } )
+    
+                })
+                
+            });
+
+        });
+
+        /**
+         * Generate 
+         */
+        extractOutputs.forEach( ( extractItem )=>{
+
+            queue = queue.then( ()=>{
+
+                return new Promise( (resolve,reject )=>{
+                    
+                    // Clear the previous imports from the first INFO pass
+                    extractItem.info.clearRefs();
+
+                    babel.transform( extractItem.code, {
+                        plugins: [ 
+                            transformPlugin( 'gather', extractItem.info )
+                        ]
+                    }, ( err, result )=>{
+            
+                        if( err ){
+                            reject(err);
+                        }else{    
+                            extractItem.code = result.code;                            
+                            resolve( extractItem );
                         }                        
             
                     } )
@@ -46,11 +96,11 @@ module.exports = function( state ){
 
         });
 
+
+
         return queue.then( ()=>{
 
-            console.log( 'REJECT' );
-            reject();
-            // resolve();
+            resolve();
 
         })
 

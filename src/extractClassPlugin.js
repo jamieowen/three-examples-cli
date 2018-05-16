@@ -20,9 +20,6 @@ module.exports = function( extractClass, info ){
 
                 Program: ( path,state )=>{
 
-                    console.log( 'EXTRACT : ', extractClass );
-                    console.log();
-
                 },
 
                 Identifier: ( path,state )=>{   
@@ -32,20 +29,15 @@ module.exports = function( extractClass, info ){
 
                     if( exports.indexOf( identifier ) > -1 ){
 
-                        console.log( 'SOMETHING', identifier, extractClass );
                         if( identifier !== extractClass ){
 
-                            let pp = path.find( (p)=>{                                
+                            // Find root of this functional block and delete.
+                            
+                            let root = path.find( (p)=>{                                
                                 return p.parentPath.isProgram();
-                            })
+                            });
 
-                            pp.remove();
-                            console.log( '>>>> ', pp.type );
-                            // while( parent ){
-                            //     console.log( parent.type );
-                            //     parent = path.parentPath;
-                            // }
-
+                            root.remove();
 
                         }
 

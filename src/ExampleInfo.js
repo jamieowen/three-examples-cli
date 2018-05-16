@@ -20,6 +20,19 @@ module.exports = class ExampleInfo{
         
     }
 
+    /**
+     * Used only when extracting a class.
+     */
+    clearRefs(){
+
+        this.imports.splice(0);
+        this.exports.splice(0);
+        this.globals.splice(0);
+
+        this.exportDefault = null;
+
+    }
+
     isGlobal(cls){
 
         return this.manager.isGlobal(cls);
@@ -72,8 +85,14 @@ module.exports = class ExampleInfo{
 
         const clone = this.clone();
         clone.path = newPath;
-        clone.exportDefault = cls;
-        clone.exports = [ cls ];
+
+        /**
+         * We don't need to modify exports just yet.
+         * Exports are required for extraction, and they will be reset after.
+         * @see extractClasses stage.
+         */
+        // clone.exportDefault = cls;
+        // clone.exports = [ cls ];
 
         if( updateManager ){
 
