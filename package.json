@@ -3,6 +3,7 @@
     "examples": "node node_modules/three-examples-cli/bin/index.js",
     "cli-help": "node node_modules/three-examples-cli/bin/index.js --help",
     "cli-dryrun": "node node_modules/three-examples-cli/bin/index.js --dryrun  --loaders --postprocessing --controls --output=three-examples",
+    "cli-all": "node node_modules/three-examples-cli/bin/index.js --output=three-examples",
     "demo": "webpack-dev-server --open"
   },
   "dependencies": {

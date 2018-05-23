@@ -9,12 +9,12 @@ import {
     HemisphereLight
 } from 'three';
 
-// import { Composer } from './inherit-test/TestComposer';
+import { EffectComposer } from '../three-examples/postprocessing/EffectComposer';
 
-import { EffectComposer } from 'three/ex/postprocessing/EffectComposer';
 
 window.onload = ()=>{
 
+    console.log( EffectComposer );
     // const test = new Composer();
 
     const renderer = new WebGLRenderer({
