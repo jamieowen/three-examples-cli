@@ -25,6 +25,7 @@ module.exports = function addGroupArgs( state ){
                 yargs.option( group, {
                     // alias: 's',
                     describe: `Include all ${group} modules.`,
+                    default: true
                     // choices: ['xs', 's', 'm', 'l', 'xl']
                   });
 

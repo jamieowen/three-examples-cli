@@ -60,7 +60,7 @@ module.exports = class ExampleInfo{
 
         if( this.exports.indexOf( memberName ) === -1 ){
             this.exports.push( memberName );
-        }        
+        }
 
     }
     

@@ -2,6 +2,8 @@
 const path = require( 'path' );
 const babel = require( '@babel/core' );
 const ora = require( 'ora' );
+const chalk = require( 'chalk' );
+const log = require( './utils/log' );
 
 const transformPlugin = require( './transformPlugin' );
 
@@ -17,12 +19,16 @@ module.exports = ( state )=>{
     const three = require( threePath );
     const manager = new ExamplesManager( three );
 
+    log.step( 'Parsing Dependency Info' );
+
     const stats = {};      
-    const spinner = ora('Parsing Examples\nHello').start();
+    const spinner = ora('Building Dependency Info').start();
     const updateStats = ( path, stats )=>{
 
-        let text = 'Parsing Examples';
-        text += `\n:${path}`;
+        let text = '\nExtracting Dependency Info.';
+        // text += `\n: ${path}`;
+        text += chalk.white( '\n\nExtracting:' );
+        text += chalk.yellow( `${path}` );
 
         // let sorted = Object.keys( stats ).map( (k,i)=>{
         //     return { value: stats[k], key: k }
@@ -75,7 +81,6 @@ module.exports = ( state )=>{
     return queue.then( ( result )=>{
 
         spinner.stopAndPersist();
-
         state.manager = manager;
         return state;
 

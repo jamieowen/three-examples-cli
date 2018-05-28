@@ -2,6 +2,7 @@ const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const babel = require( '@babel/core' );
 const ora = require( 'ora' );
+const log = require( './utils/log' );
 
 const transformPlugin = require( './transformPlugin' );
 
@@ -16,7 +17,7 @@ module.exports = ( state )=>{
     state.output.forEach( ( outputItem )=>{
 
         const outputPath = path.join( process.cwd(), 'three-examples', outputItem.output );
-        console.log( 'Output:', outputPath );
+        // console.log( 'Output:', outputPath );
         
         queue = queue.then( ()=>{
 
@@ -27,11 +28,12 @@ module.exports = ( state )=>{
                 if( outputItem.extractClass && outputItem.code ){
                     transformFunc = 'transform';
                     codeOrPath = outputItem.code;
-                    console.log( 'Extracted', outputItem.extractClass );
                 }else{
                     transformFunc = 'transformFile';
                     codeOrPath = path.join( state.threePath, outputItem.input );
                 }
+
+                log.file( outputItem.input, outputItem.output );
 
                 babel[ transformFunc ]( codeOrPath, {
                     plugins: [ 
@@ -52,15 +54,8 @@ module.exports = ( state )=>{
                 // Write File.
                 return new Promise( ( resolve,reject )=>{
 
-                    // const newPath = info.path
-                    //     .split( path.sep )
-                    //     .slice( 2 ).join( path.sep );
+                    fs.ensureDirSync( outputPath.split('/').slice(0,-1).join('/') );
 
-                    // const dirs = newPath
-                    //     .split( path.sep )
-                    //     .slice( 0,-1 ).join( path.sep );    
-
-                    fs.ensureDirSync( outputPath.split('/').slice(0,-1).join('/') );                   
                     fs.writeFile( outputPath, ast.code, {
                         encoding: 'utf8' 
                     }, ( err,res )=>{
@@ -68,7 +63,6 @@ module.exports = ( state )=>{
                         if( err ){
                             reject(err);
                         }else{                                            
-                            console.log( 'Written :', outputPath );
                             resolve();
                         }
         

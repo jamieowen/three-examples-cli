@@ -233,12 +233,6 @@ module.exports = class ExamplesManager{
          * Optimize to use optimal split via
          * import or via export.
          */
-        unresolved.forEach( (un)=>{
-
-            console.log( 'Unresolved:', un.circ.ref.import, un.circ.ref.export );
-            
-        })
-
         const extract = {};
 
         resolved.forEach( (res)=>{
@@ -257,8 +251,6 @@ module.exports = class ExamplesManager{
                 }
 
             }
-
-            console.log( 'Resolved:', res.extractClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
 
             if( !extract[ res.extractClass ] ){
 

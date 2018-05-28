@@ -27,8 +27,6 @@ module.exports = function( state ){
             return item.extractClass !== undefined;
         });
 
-        console.log( 'EXTRACT CLASSES: ', extractOutputs );
-
         let queue = Promise.resolve();
         
         /**
@@ -40,7 +38,6 @@ module.exports = function( state ){
 
                 return new Promise( (resolve,reject )=>{
                     
-                    console.log( 'EXTRACT ITEM : ', extractItem.extractClass, extractItem.info.exports );
                     babel.transformFile( path.join( state.threePath, extractItem.input ), {
                         plugins: [ 
                             extractClassPlugin( extractItem.extractClass, extractItem.info )
@@ -51,7 +48,7 @@ module.exports = function( state ){
                             reject(err);
                         }else{    
                             extractItem.code = result.code;  
-                            console.log( "CODE : ", extractItem.code );                          
+
                             resolve( extractItem );
                         }
             

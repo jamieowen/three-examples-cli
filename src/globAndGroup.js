@@ -22,10 +22,10 @@ module.exports = function globAndGroup( state ){
                 
                 // 'examples/js/math/ColorConverter.js',
                 // 'examples/js/loaders/NodeMaterialLoader.js',
-                'examples/js/loaders/PRWMLoader.js',
-                'examples/js/loaders/XLoader.js',
-                'examples/js/Octree.js',
-                'examples/js/Volume.js'
+                // 'examples/js/loaders/PRWMLoader.js',
+                // 'examples/js/loaders/XLoader.js',
+                // 'examples/js/Octree.js',
+                // 'examples/js/Volume.js'
     
             ]
         }, (err, examples )=>{

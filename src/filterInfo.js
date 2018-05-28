@@ -40,6 +40,16 @@ module.exports = function filterInfo( state ){
             return path.split( '/' ).slice( 2 ).join( '/' );
         }
 
+        circRes.unresolved.forEach( (un)=>{
+
+            console.log( 'Unresolved:', un.circ.ref.import, un.circ.ref.export );
+            
+        })
+
+        circRes.resolved.forEach( (res)=>{
+            console.log( 'Resolved:', res.extractClass, res.writePath, res.circ.ref.import, res.circ.ref.export );
+        });
+
         /**
          * Build the expected write paths
          */
