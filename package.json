@@ -4,13 +4,20 @@
     "cli-help": "node node_modules/three-examples-cli/bin/index.js --help",
     "cli-dryrun": "node node_modules/three-examples-cli/bin/index.js --dryrun  --loaders --postprocessing --controls --output=three-examples",
     "cli-all": "node node_modules/three-examples-cli/bin/index.js --output=three-examples",
-    "demo": "webpack-dev-server --open"
+    "demo": "webpack-dev-server --open",
+    "build": "cp -R three.js/examples/ ./build/ && node scripts/create-build.js",
+    "write-deps": "node node_modules/three-examples-cli/bin/index.js --output=three-examples --write-deps=scripts/output-deps.generated.json"
   },
   "dependencies": {
     "@babel/core": "^7.0.0-beta.46",
     "@babel/preset-env": "^7.0.0-beta.46",
     "babel-loader": "^8.0.0-beta",
+    "chalk": "^2.4.1",
+    "cheerio": "^1.0.0-rc.2",
+    "fs-extra": "^6.0.1",
+    "glob": "^7.1.2",
     "html-webpack-plugin": "^3.2.0",
+    "serve": "^6.5.8",
     "three": "^0.92.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15",
