@@ -1,43 +1,75 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
+/**
+ * Exports a JSON file as a map of input example file paths
+ * to an array of the number of output files and their internal dependencies.
+ */
 module.exports = ( state )=>{
 
     if( state.argv[ 'write-deps' ] ){
 
         return new Promise( (resolve,reject)=>{
 
-            const jsonByClass = {};
+            const jsonByInputPath = {};
             const extractedMap = {};
-            
+
+            /**
+             * Could probably be done a bit better...
+             */
             state.output.forEach( ( output )=>{
 
                 if( output.extractClass ){
+
                     extractedMap[ output.extractClass ] = output;
+
+                    if( jsonByInputPath[ output.input ] === undefined ){
+                        jsonByInputPath[ output.input ] = [];                    
+                    }
+
+                    const info = state.manager.byClass[ output.extractClass ];
+                     
+                    jsonByInputPath[ output.input ].push( {
+                        inputPath: output.input,
+                        outputPath: output.output,
+                        wasExtracted: true,
+                        imports: info.imports,
+                        exports: info.exports,
+                        globals: info.globals,
+                        exportDefault: info.exportDefault,
+                        group: info.group                        
+                    })
                 }
 
             })
 
-            Object.keys( state.manager.byClass ).forEach( (key)=>{
+            Object.keys( state.manager.byPath ).forEach( (key)=>{
 
-                const info = state.manager.byClass[ key ];
-                const extracted = extractedMap[ info.exportDefault ];
+                const info = state.manager.byPath[ key ];
 
-                jsonByClass[ key ] = {
+                if( extractedMap[ info.exportDefault ] ){
+                    return; // Ignore if we have handled above.
+                }
+                
+                if( jsonByInputPath[ key ] === undefined ){
+                    jsonByInputPath[ key ] = [];                    
+                }
+
+                jsonByInputPath[ key ].push( {
                     inputPath: info.path,
-                    outputPath: extracted ? extracted.output : info.path.replace( 'examples/js/', '' ),
-                    wasExtracted: extracted !== undefined,
+                    outputPath: info.path,
+                    wasExtracted: false,
                     imports: info.imports,
                     exports: info.exports,
                     globals: info.globals,
                     exportDefault: info.exportDefault,
                     group: info.group
-                }
+                } );
 
             });
 
             const writePath = path.join( process.cwd(), state.argv[ 'write-deps' ] );
-            fs.writeFileSync( writePath, JSON.stringify(jsonByClass,null,4), { encoding: 'utf8' } );
+            fs.writeFileSync( writePath, JSON.stringify(jsonByInputPath,null,4), { encoding: 'utf8' } );
 
         } );
 

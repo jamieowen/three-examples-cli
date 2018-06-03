@@ -68,6 +68,7 @@ module.exports = class ExampleInfo{
 
         const clone = new ExampleInfo();
         clone.path = this.path;
+        clone.extractedFrom = this.extractedFrom;
         clone.group = this.group;
         clone.manager = this.manager;
         clone.imports = [].concat( this.imports );
