@@ -85,6 +85,7 @@ module.exports = class ExampleInfo{
 
         const clone = this.clone();
         clone.path = newPath;
+        clone.extractedFrom = this;
 
         /**
          * We don't need to modify exports just yet.
