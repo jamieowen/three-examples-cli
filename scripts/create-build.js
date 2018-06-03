@@ -22,14 +22,47 @@ exampleHtmlFiles.forEach( ( htmlPath )=>{
     const document = cheerio.load( content );
     const scripts = document('body').find('script');
     
-
     const imports = [];
+
+    // Build map of imports.
+    
+    const findCircularRefRedirect = ( imp )=>{
+
+        // Could be faster with lookup.
+        for( let i = 0; i<exampleDeps.output.length; i++ ){
+            let out = exampleDeps.output[i];
+
+            if( out.input === imp ){
+                console.log( 'REDIRECT', imp );
+            }
+
+        }
+
+        return imp;
+
+    }
 
     for( let i = 0; i<scripts.length; i++ ){
 
         let script = scripts[ i ];
-        // console.log( script.attribs.src );
+        let src = `examples/${script.attribs.src}`;        
+        let depInfo = exampleDeps.byPath[ src ];
 
+        if( depInfo ){
+            
+            depInfo.imports.forEach( (imp)=>{
+                if( imports.indexOf(imp) === -1 ){
+                    console.log( imp );
+                    imports.push( findCircularRefRedirect(imp) );    
+                }                
+            });
+
+        }
+        
+    }
+
+    if( imports.length ){
+        // console.log( 'EXAMPLE : ', inputHtml, imports.length, imports );
     }
 
     // Style.
@@ -101,7 +134,7 @@ exampleHtmlFiles.forEach( ( htmlPath )=>{
     //     </div>
     // ` );
 
-    console.log( outputHtml );
+    // console.log( outputHtml );
     fs.writeFileSync( path.join( buildOutputPath, htmlPath ), document.html() );
     
     
