@@ -2,8 +2,8 @@ const test = require( 'ava' );
 const babel = require( '@babel/core' );
 const path = require( 'path' );
 
-const extractClassPlugin = require( '../src/extractClassPlugin' );
-const ExampleInfo = require( '../src/ExampleInfo' );
+const extractClassPlugin = require( '../extractClassPlugin' );
+const ExampleInfo = require( '../ExampleInfo' );
 const EFFECT_COMPOSER_PATH = path.join( __dirname, 'fixtures/EffectComposer.js' );
 
 const createInfo = ( exportDefault )=>{

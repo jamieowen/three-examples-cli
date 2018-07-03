@@ -1,6 +1,6 @@
 const test = require( 'ava' );
 const babel = require( '@babel/core' );
-const astExtra = require( '../src/ast' );
+const astExtra = require( '../ast' );
 
 
 const transform = function transformPlugin( babel ){
